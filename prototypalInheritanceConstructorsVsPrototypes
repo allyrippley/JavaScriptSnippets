@@ -1,0 +1,27 @@
+The underlying idea is that prototypal inheritance using constructors is more complicated than prototypal inheritance using prototypes. Let's consider prototypal inheritance using prototypes first:
+
+1 var square = Object.create(rectangle);
+2 
+3 square.create = function (side) {
+4     return rectangle.create.call(this, side, side);
+5 };
+6 
+7 var sq = square.create(5);
+8 
+9 alert(sq.area());
+It's easy to understand what's happening here. First we create a clone of rectangle and call it square. Next we override the create function of square with a new create function. Finally we call the create function of rectangle from the new create function and return the object is returns. In constrast prototypal inheritance using constructors looks like this:
+
+ 1 function Square() {
+ 2     Rectangle.call(this, side, side);
+ 3 }
+ 4 
+ 5 Square.prototype = Object.create(Rectangle.prototype);
+ 6 
+ 7 Square.prototype.constructor = Square;
+ 8 
+ 9 var sq = new Square(5);
+10 
+11 alert(sq.area());
+Sure, the constructor function becomes simpler. However it becomes very difficult to explain prototypal inheritance to a person who knows nothing about it. It becomes even more difficult to explain it to a person who knows classical inheritance.
+
+When using the prototypal pattern it becomes obvious that one object inherits from another object. When using the constructor pattern this is not so obvious because you tend to think in terms of constructors inheriting from other constructors.

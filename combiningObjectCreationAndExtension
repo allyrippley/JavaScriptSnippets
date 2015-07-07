@@ -1,0 +1,41 @@
+In the previous example we created a clone of rectangle and called it square. Then we extended it with a new create property, overriding the create function inherited from rectangle. It would be nice to combine these two operations into one, just like object literals are used to create clones of Object.prototype and extend it with new properties. This operation, called extend, can be implemented as a function:
+
+ 1 Object.prototype.extend = function (extension) {
+ 2     var hasOwnProperty = Object.hasOwnProperty;
+ 3     var object = Object.create(this);
+ 4 
+ 5     for (var property in extension)
+ 6         if (hasOwnProperty.call(extension, property) ||
+ 7             typeof object[property] === "undefined")
+ 8                 object[property] = extension[property];
+ 9 
+10     return object;
+11 };
+Using the above extend function we can rewrite the code for square as follows:
+
+1 var square = rectangle.extend({
+2     create: function (side) {
+3         return rectangle.create.call(this, side, side);
+4     }
+5 });
+6 
+7 var sq = square.create(5);
+8 
+9 alert(sq.area());
+The extend function is the only operation required for prototypal inheritance. It's a superset of the Object.create function and hence it can be used for both object creation and extension, making Object.create obsolete. Hence we can rewrite the code for rectangle using extend as follows, making the create function more structured like the module pattern:
+
+ 1 var rectangle = {
+ 2     create: function (width, height) {
+ 3         return this.extend({
+ 4             height: height,
+ 5             width: width
+ 6         });
+ 7     },
+ 8     area: function () {
+ 9         return this.width * this.height;
+10     }
+11 };
+12 
+13 var rect = rectangle.create(5, 10);
+14 
+15 alert(rect.area());

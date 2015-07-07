@@ -1,0 +1,25 @@
+Extending a Newly Created Object
+
+In the above example we cloned the rectangle object and called it rect, but before we may use the area function of rect we need to extend it with width and height properties as follows:
+
+1 rect.width = 5;
+2 rect.height = 10;
+3 alert(rect.area());
+However this is a very clumsy way to create a clone of an object and extend it with new properties. We need to manually define width and height on every clone of rectangle. It would be nice to have a function create a clone of rectangle and extend it with width and height properties for us. Sounds familiar? It is. I'm talking about a constructor function. Let's call this function create and define it on the rectangle object itself:
+
+ 1 var rectangle = {
+ 2     create: function (width, height) {
+ 3         var self = Object.create(this);
+ 4         self.height = height;
+ 5         self.width = width;
+ 6         return self;
+ 7     },
+ 8     area: function () {
+ 9         return this.width * this.height;
+10     }
+11 };
+12 
+13 var rect = rectangle.create(5, 10);
+14 
+15 alert(rect.area());
+

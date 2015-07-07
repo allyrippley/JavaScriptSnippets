@@ -1,0 +1,19 @@
+Cloning an Existing Object
+
+The Object.create function can also be used to clone an existing object as follows:
+
+1 var rectangle = {
+2     area: function () {
+3         return this.width * this.height;
+4     }
+5 };
+6 
+7 var rect = Object.create(rectangle);
+In the above example rect inherits the area function from rectangle. Also notice that rectangle is an object literal. An object literal is a succinct way of creating a clone of Object.prototype and extending it with new properties. It's equivalent to:
+
+1 var rectangle = Object.create(Object.prototype);
+2 
+3 rectangle.area = function () {
+4     return this.width * this.height;
+5 };
+
