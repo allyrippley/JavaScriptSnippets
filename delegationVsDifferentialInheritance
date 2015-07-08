@@ -1,0 +1,16 @@
+
+st JavaScript programmers are familiar with differential inheritance. To quote from Wikipedia:
+
+It operates on the principle that most objects are derived from other, more general objects, and only differ in a few small aspects; while usually maintaining a list of pointers internally to other objects which the object differs from.
+
+Prototypal inheritance in JavaScript is based on differential inheritance. Every object in JavaScript has an internal pointer, called [[proto]], which points to the prototype of that object. The [[proto]] property of objects created ex nihilo point to null. This forms a chain of objects linked via the internal [[proto]] property (hence called a prototype chain), which ends in null.
+
+When you try to access a property of an object the JavaScript engine first searches for that property on the object itself. If it cannot find the property on the object then it delegates the property access to the prototype of the object. In this way the property access traverses up the prototype chain until the property is found (in which case it's returned) or the chain ends in null (in which case undefined is returned).
+
+1 function get(object, property) {
+2     if (!Object.hasOwnProperty.call(object, property)) {
+3         var prototype = Object.getPrototypeOf(object);
+4         if (prototype) return get(prototype, property);
+5     } else return object[property];
+6 }
+If the member operators in JavaScript were functions they would be implemented as shown in the program above. It shows how property access is delegated to the prototype of an object if it's not found the object itself.
