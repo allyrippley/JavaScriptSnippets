@@ -1,0 +1,10 @@
+Most JavaScript programmers would argue that copying the properties of one object to another is not truly a form of inheritance because any modifications to the original object are not reflected on the clone. Five days ago I would have agreed. Now however I believe that concatenation is a true form of prototypal inheritance. Modifications to the original object can be propagated to its copies to achieve true prototypal inheritance.
+
+Concatenation and delegation both have their advantages and disadvantages. They are listed in the following table:
+
+Delegation	Concatenation
+Any changes to the prototype are automatically reflected on all its clones.	Any changes to the prototype need to be propagated to all its clones.
+Property access is slower because it may need to traverse up the prototype chain.	Property access is faster because inherited properties are copied.
+Objects may only delegate to a single prototype in JavaScript.	Objects may copy properties from any number of prototypes.
+
+`
