@@ -1,0 +1,64 @@
+The last point in the above table tells us that objects can inherit from multiple prototypes via concatenation. This is an important feature because it proves that prototypal inheritance is more powerful than classical inheritance in Java and as powerful as classical inheritance in C++. To implement multiple inheritance in the prototypal pattern you only need to modify the extend function to copy the properties of multiple prototypes:
+
+ 1 Object.prototype.extend = function () {
+ 2     var hasOwnProperty = Object.hasOwnProperty;
+ 3     var object = Object.create(this);
+ 4     var length = arguments.length;
+ 5     var index = length;
+ 6 
+ 7     while (index) {
+ 8         var extension = arguments[length - (index--)];
+ 9 
+10         for (var property in extension)
+11             if (hasOwnProperty.call(extension, property) ||
+12                 typeof object[property] === "undefined")
+13                     object[property] = extension[property];
+14     }
+15 
+16 
+17     return object;
+18 };
+Multiple inheritance is useful as it promotes modularity and code reusability. Objects inherit from one prototype via delegation and from the rest via concatenation. For example say you have a prototype for an event emitter as follows:
+
+ 1 var eventEmitter = {
+ 2     on: function (event, listener) {
+ 3         if (typeof this[event] !== "undefined")
+ 4             this[event].push(listener);
+ 5         else this[event] = [listener];
+ 6     },
+ 7     emit: function (event) {
+ 8         if (typeof this[event] !== "undefined") {
+ 9             var listeners = this[event];
+10             var length = listeners.length, index = length;
+11             var args = Array.prototype.slice.call(arguments, 1);
+12 
+13             while (index) {
+14                 var listener = listeners[length - (index--)];
+15                 listener.apply(this, args);
+16             }
+17         }
+18     }
+19 };
+Now you want square to behave like an event emitter. Since square already inherits from rectangle via delegation it must inherit from eventEmitter via concatenation. This change is very simple to implement using the extend function as follows:
+
+ 1 var square = rectangle.extend(eventEmitter, {
+ 2     create: function (side) {
+ 3         return rectangle.create.call(this, side, side);
+ 4     },
+ 5     resize: function (newSize) {
+ 6         var oldSize = this.width;
+ 7         this.width = this.height = newSize;
+ 8         this.emit("resize", oldSize, newSize);
+ 9     }
+10 });
+11 
+12 var sq = square.create(5);
+13 
+14 sq.on("resize", function (oldSize, newSize) {
+15     alert("sq resized from " + oldSize + " to " + newSize + ".");
+16 });
+17 
+18 sq.resize(10);
+19 
+20 alert(sq.area());
+It's impossible to implement the above program in Java since it doesn't support multiple inheritance. Instead you would either have to create a separate EventEmitter class or use an EventEmitter interface and implement the on and emit functions separately for each class that implements it. Of course you wouldn't encounter this problem in C++ but as we all know Java sucks.
