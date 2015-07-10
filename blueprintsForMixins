@@ -1,0 +1,57 @@
+In the previous example you must have noticed that the eventEmitter prototype didn't have a create function. This is because you shouldn't be able to directly create an eventEmitter object. Instead eventEmitter is used as a prototype for other prototypes. Such prototypes are called mixins. They are the prototypal equivalent of abstract classes. Mixins are used to extend the behavior of objects by providing a set of reusable functions.
+
+Sometimes however mixins require private state. For example the eventEmitter mixin would be more secure if it stored its event listeners in a private variable instead of on the this object. However mixins have no create function to encapsulate private state. Hence we create "blueprints" of mixins to create closures. Blueprints may look like constructor functions but they are not meant to be used as constructors. For example:
+
+ 1 function eventEmitter() {
+ 2     var events = Object.create(null);
+ 3 
+ 4     this.on = function (event, listener) {
+ 5         if (typeof events[event] !== "undefined")
+ 6             events[event].push(listener);
+ 7         else events[event] = [listener];
+ 8     };
+ 9 
+10     this.emit = function (event) {
+11         if (typeof events[event] !== "undefined") {
+12             var listeners = events[event];
+13             var length = listeners.length, index = length;
+14             var args = Array.prototype.slice.call(arguments, 1);
+15 
+16             while (index) {
+17                 var listener = listeners[length - (index--)];
+18                 listener.apply(this, args);
+19             }
+20         }
+21     };
+22 }
+A blueprint is used to extend an object via concatenation after it's created. Eric Elliot calls them closure prototypes. The code for square would be written as follows if we used the blueprint version of eventEmitter instead:
+
+ 1 var square = rectangle.extend({
+ 2     create: function (side) {
+ 3         var self = rectangle.create.call(this, side, side);
+ 4         eventEmitter.call(self);
+ 5         return self;
+ 6     },
+ 7     resize: function (newSize) {
+ 8         var oldSize = this.width;
+ 9         this.width = this.height = newSize;
+10         this.emit("resize", oldSize, newSize);
+11     }
+12 });
+13 
+14 var sq = square.create(5);
+15 
+16 sq.on("resize", function (oldSize, newSize) {
+17     alert("sq resized from " + oldSize + " to " + newSize + ".");
+18 });
+19 
+20 sq.resize(10);
+21 
+22 alert(sq.area());
+Blueprints are unique to JavaScript. They are a powerful feature. However they have their own disadvantages. The following table compares the advantages and disadvantages of mixins and blueprints:
+
+Mixins	Blueprints
+They are used to extend prototypes of objects. Hence objects share the same blueprint functions.	They are used to extend newly created objects. Hence every object has its own set of blueprint functions.
+No private state due to lack of an encapsulating function.	They are functions, and hence they encapsulate private state.
+They are static prototypes and can't be customized.	They can be passed arguments to customize the object.
+
