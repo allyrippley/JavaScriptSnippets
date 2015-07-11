@@ -1,0 +1,22 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1348\cocoasubrtf170
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\f0\fs24 \cf0     var cookieString = document.cookie;\
+    var cookieArray = cookieString.split(';');\
+    for(var i=0; i<cookieArray.length; i++)\{\
+        var cookieElementsArray = cookieArray[i].split('=');\
+        cookieElementsArray[0] = cookieElementsArray[0].replace(/\\s/g, '');\
+        if(cookieElementsArray[0] === 'asc')\{\
+            if(cookieElementsArray[1] == 2)\{\
+                var homeTakeoverElement = document.getElementById("homeTakeover");\
+                homeTakeoverElement.style.visibility = "visible";\
+                break;\
+            \}\
+        \} else\{\
+            var homeHeroElement = document.getElementById("homeHero");\
+            homeHeroElement.style.visibility = "visible";\
+        \}\
+    \}}
