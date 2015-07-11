@@ -1,0 +1,94 @@
+Many JavaScript programmers would argue that using the prototypal pattern for inheritance is against the spirit of the language. They favor the constructor pattern because they believe that objects created using constructors are actual "instances", since the instanceof operator yields true. However, this argument is moot because the instanceof operator can be implemented in JavaScript as follows:
+
+ 1 Object.prototype.instanceof = function (prototype) {
+ 2     var object = this;
+ 3 
+ 4     do {
+ 5         if (object === prototype) return true;
+ 6         var object = Object.getPrototypeOf(object);
+ 7     } while (object);
+ 8 
+ 9     return false;
+10 };
+The instanceof function can now be used to test whether an object inherits from a prototype via delegation. For example:
+
+sq.instanceof(square);
+However it's not possible to determine whether an object inherits from a prototype via concatenation as instance relationship information is lost. To solve this problem we save the references of all the clones of a prototype on the prototype itself, and use this information to determine whether an object is an instance of a prototype. This can be done by modifying the extend function as follows:
+
+ 1 Object.prototype.extend = function () {
+ 2     var hasOwnProperty = Object.hasOwnProperty;
+ 3     var object = Object.create(this);
+ 4     var length = arguments.length;
+ 5     var index = length;
+ 6 
+ 7     while (index) {
+ 8         var extension = arguments[length - (index--)];
+ 9 
+10         for (var property in extension)
+11             if (property !== "clones" &&
+12                 hasOwnProperty.call(extension, property) ||
+13                 typeof object[property] === "undefined")
+14                     object[property] = extension[property];
+15 
+16         if (hasOwnProperty.call(extension, "clones"))
+17             extension.clones.unshift(object);
+18         else extension.clones = [object];
+19     }
+20 
+21     return object;
+22 };
+Objects that inherit from prototypes via concatenation form a tree of clones which starts from the root object and proceeds down to the leaf objects. A clone chain is a single path from the root object to a leaf object and it's similar to a reverse prototype chain. We use this information to determine whether an object inherits from a prototype via concatenation as follows:
+
+ 1 Object.prototype.instanceof = function (prototype) {
+ 2     if (Object.hasOwnProperty.call(prototype, "clones"))
+ 3         var clones = prototype.clones;
+ 4     var object = this;
+ 5 
+ 6     do {
+ 7         if (object === prototype ||
+ 8             clones && clones.indexOf(object) >= 0)
+ 9                 return true;
+10 
+11         var object = Object.getPrototypeOf(object);
+12     } while (object);
+13 
+14     return false;
+15 };
+The instanceof function can now be used to test whether an object inherits from a prototype via concatenation. For example:
+
+sq.instanceof(eventEmitter);
+In the above program the instanceof function will return true if we use the mixin version of eventEmitter. However it will return false if we use the blueprint version of eventEmitter. To solve this problem we create a blueprint function which takes a blueprint as an argument, adds the clones property to it and returns a new blueprint which records its clones:
+
+ 1 function blueprint(f) {
+ 2     var g = function () {
+ 3         f.apply(this, arguments);
+ 4         g.clones.unshift(this);
+ 5     };
+ 6 
+ 7     g.clones = [];
+ 8 
+ 9     return g;
+10 };
+11 
+12 var eventEmitter = blueprint(function () {
+13     var events = Object.create(null);
+14 
+15     this.on = function (event, listener) {
+16         if (typeof events[event] !== "undefined")
+17             events[event].push(listener);
+18         else events[event] = [listener];
+19     };
+20 
+21     this.emit = function (event) {
+22         if (typeof events[event] !== "undefined") {
+23             var listeners = events[event];
+24             var length = listeners.length, index = length;
+25             var args = Array.prototype.slice.call(arguments, 1);
+26 
+27             while (index) {
+28                 var listener = listeners[length - (index--)];
+29                 listener.apply(this, args);
+30             }
+31         }
+32     };
+33 });
