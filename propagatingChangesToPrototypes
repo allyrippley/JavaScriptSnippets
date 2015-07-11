@@ -1,0 +1,59 @@
+The clones property in the previous example serves a dual purpose. It's used to determine whether an object inherits from a prototype via concatenation, and it's used to propagate changes made to a prototype to all its clones. The main advantage of prototypal inheritance over classical inheritance is that you can modify a prototype after it's created. To enable clones to inherit modifications made to a prototype we create a function called define:
+
+ 1 Object.prototype.define = function (property, value) {
+ 2     this[property] = value;
+ 3 
+ 4     if (Object.hasOwnProperty.call(this, "clones")) {
+ 5         var clones = this.clones;
+ 6         var length = clones.length;
+ 7 
+ 8         while (length) {
+ 9             var clone = clones[--length];
+10             if (typeof clone[property] === "undefined")
+11                 clone.define(property, value);
+12         }
+13     }
+14 };
+Now we can make modifications to a prototype and the changes will be reflected in all the clones. For example we can create an alias addEventListener for the on function of the eventEmitter mixin:
+
+ 1 var square = rectangle.extend(eventEmitter, {
+ 2     create: function (side) {
+ 3         return rectangle.create.call(this, side, side);
+ 4     },
+ 5     resize: function (newSize) {
+ 6         var oldSize = this.width;
+ 7         this.width = this.height = newSize;
+ 8         this.emit("resize", oldSize, newSize);
+ 9     }
+10 });
+11 
+12 var sq = square.create(5);
+13 
+14 eventEmitter.define("addEventListener", eventEmitter.on);
+15 
+16 sq.addEventListener("resize", function (oldSize, newSize) {
+17     alert("sq resized from " + oldSize + " to " + newSize + ".");
+18 });
+19 
+20 sq.resize(10);
+21 
+22 alert(sq.area());
+Blueprints need some special attention. Although changes made to blueprints will be propagated to its clones, yet new clones of blueprints will not reflect these changes. Fortunately the solution to this problem is simple. We only need to make a minor modification to the blueprint function as follows, and any changes made to a blueprint created by blueprint will be reflected in all its clones.
+
+ 1 function blueprint(f) {
+ 2     var g = function () {
+ 3         f.apply(this, arguments);
+ 4         g.clones.unshift(this);
+ 5 
+ 6         var hasOwnProperty = Object.hasOwnProperty;
+ 7 
+ 8         for (var property in g)
+ 9             if (property !== "clones" &&
+10                 hasOwnProperty.call(g, property))
+11                     this[property] = g[property];
+12     };
+13 
+14     g.clones = [];
+15 
+16     return g;
+17 };
