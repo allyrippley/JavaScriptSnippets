@@ -1,0 +1,41 @@
+you are asked to square every digit of a number.
+For example, if we run 9119 through the function, 811181 will come out.
+Note: The function accepts an integer and returns an integer
+
+
+function squareDigits(num){
+  var inputStr = num.toString();
+  var result = "";
+  for(var i = 0; i < inputStr.length; i++) {
+    var currNum = parseInt(inputStr[i]);
+    if(isNaN(currNum)) return "Not a number.";
+    var currSq = currNum * currNum;
+    result += currSq.toString();
+  }
+  return parseInt(result.trim());
+}
+
+
+
+
+<!-- WITH COMMENTS -->
+
+//declare function, name and arguments
+function squareDigits(num){
+
+  //convert input to string (of characters)
+  var inputStr = num.toString();
+
+  //create result variable as string
+  var result = "";
+  
+  //iterate through each character in input
+  for(var i = 0; i < inputStr.length; i++) {
+    //
+    var currNum = parseInt(inputStr[i]);
+    if(isNaN(currNum)) return "Not a number.";
+    var currSq = currNum * currNum;
+    result += currSq.toString();
+  }
+  return parseInt(result.trim());
+}
